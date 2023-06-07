@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recipeasy</title>
+    <link rel="stylesheet" href="/stylesheets/style.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <script src="https://kit.fontawesome.com/829e5d7ffb.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <script>var isAuthenticated = <%= isAuthenticated %>;</script>
+    <script type="module" src="/javascript/scripts/navScript.js" defer></script>
+    <script type="module" src="/searchPage.bundle.js" defer></script>
+</head>
+<body>
+    <div class="loadingScreen" id="loadingScreen"><i class="fas fa-sync fa-spin"></i></div>
+    <header>
+        <nav class="navbar-nav">
+            <div class="navbar-container">
+                <div class="navbar-logoContainer">
+                    <a href="/"><strong>Recipeasy</strong></a>
+                </div>
+                <ul class="navbar-navLinksList">
+                    <li class="navbar-navLink"><a href="/search">Search Recipes<span class="navLink-underline"></span></a></li>
+                    <li class="navbar-navLink"><a >Today's Recommendations<span class="navLink-underline"></span></a></li>
+                    <li class="navbar-navLink">
+                        <div class="account-links-container">
+                            <ul class="account-links">
+                                <li style="float:left;">
+                                    <div class="account-dropdown">
+                                        <div class="dropbutton-container">
+                                            <button class="account-dropbutton toggle-dropdwn-button" aria-expanded="false">
+                                                <i class="fa-solid fa-circle-user account-icon"></i>
+                                            </button>
+                                        </div>
+                                        <ul class="dropdown-content account-dropdown-content">
+                                            <li><a class="dropdown-links" href="/profile">Profile</a></li>
+                                            <li id="login-logout"></li>
+                                        </ul>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+    <div class="search-container">
+        <div class="filters-section">
+            <div class="filters-container">
+                <h2>Filters:</h2>
+                <div class="filters includeIngredients">
+                    <h3>Include Ingredients:</h3>
+                    <form id="includeIngredients-form">
+                        <input id="includedIngredient-input" placeholder="Ingredient..." name="includeIngredient" type="search"/>
+                    </form>
+                    <div class="includedIngredients"></div>
+                </div>
+                <div class="filters diets">
+                    <h3 class="dropdown">Dietary Restrictions <i class="fa-solid fa-caret-down"></i></h3>
+                    <ul class="dropdown-filters">
+                        <li><label><input class="filter dietaryRestrictionFilter" value="Gluten Free" type="checkbox"/>Gluten Free</label></li>
+                        <li><label><input class="filter dietaryRestrictionFilter" value="Ketogenic" type="checkbox"/>Ketogenic</label></li>
+                        <li><label><input class="filter dietaryRestrictionFilter" value="Vegetarian" type="checkbox"/>Vegetarian</label></li>
+                        <li><label><input class="filter dietaryRestrictionFilter" value="Lacto-Vegetarian" type="checkbox"/>Lacto-Vegetarian</label></li>
+                        <li><label><input class="filter dietaryRestrictionFilter" value="Ovo-Vegetarian" type="checkbox"/>Ovo-Vegetarian</label></li>
+                        <li><label><input class="filter dietaryRestrictionFilter" value="Vegan" type="checkbox"/>Vegan</label></li>
+                        <li><label><input class="filter dietaryRestrictionFilter" value="Pescetarian" type="checkbox"/>Pescetarian</label></li>
+                        <li><label><input class="filter dietaryRestrictionFilter" value="Paleo" type="checkbox"/>Paleo</label></li>
+                        <li><label><input class="filter dietaryRestrictionFilter" value="Primal" type="checkbox"/>Primal</label></li>
+                        <li><label><input class="filter dietaryRestrictionFilter" value="Low FODMAP" type="checkbox"/>Low FODMAP</label></li>
+                        <li><label><input class="filter dietaryRestrictionFilter" value="Whole30" type="checkbox"/>Whole30</label></li>
+                    </ul>
+                </div>
+                <div class="filters cuisines">
+                    <h3 class="dropdown">Cuisines <i class="fa-solid fa-caret-down"></i></h3>
+                    <ul class="dropdown-filters" aria-expanded="false">
+                        <li><label><input class="filter cuisineFilter" value="African" type="checkbox"/>African</label></li>
+                        <li><label><input class="filter cuisineFilter" value="American" type="checkbox"/>American</label></li>
+                        <li><label><input class="filter cuisineFilter" value="British" type="checkbox"/>British</label></li>
+                        <li><label><input class="filter cuisineFilter" value="Cajun" type="checkbox"/>Cajun</label></li>
+                        <li><label><input class="filter cuisineFilter" value="Caribbean" type="checkbox"/>Caribbean</label></li>
+                        <li><label><input class="filter cuisineFilter" value="Chinese" type="checkbox"/>Chinese</label></li>
+                        <li><label><input class="filter cuisineFilter" value="Eastern" type="checkbox"/>Eastern</label></li>
+                        <li><label><input class="filter cuisineFilter" value="European" type="checkbox"/>European</label></li>
+                        <li><label><input class="filter cuisineFilter" value="French" type="checkbox"/>French</label></li>
+                        <li><label><input class="filter cuisineFilter" value="German" type="checkbox"/>German</label></li>
+                        <li><label><input class="filter cuisineFilter" value="Greek" type="checkbox"/>Greek</label></li>
+                        <li><label><input class="filter cuisineFilter" value="Indian" type="checkbox"/>Indian</label></li>
+                        <li><label><input class="filter cuisineFilter" value="Irish" type="checkbox"/>Irish</label></li>
+                        <li><label><input class="filter cuisineFilter" value="Italian" type="checkbox"/>Italian</label></li>
+                        <li><label><input class="filter cuisineFilter" value="Japanese" type="checkbox"/>Japanese</label></li>
+                        <li><label><input class="filter cuisineFilter" value="Jewish" type="checkbox"/>Jewish</label></li>
+                        <li><label><input class="filter cuisineFilter" value="Korean" type="checkbox"/>Korean</label></li>
+                        <li><label><input class="filter cuisineFilter" value="Latin American" type="checkbox"/>Latin American</label></li>
+                        <li><label><input class="filter cuisineFilter" value="Mediterranean" type="checkbox"/>Mediterranean</label>
+                        <li><label><input class="filter cuisineFilter" value="Mexican" type="checkbox"/>Mexican</label></li>
+                        <li><label><input class="filter cuisineFilter" value="Middle Eastern" type="checkbox"/>Middle Eastern</label></li>
+                        <li><label><input class="filter cuisineFilter" value="Nordic" type="checkbox"/>Nordic</label></li>
+                        <li><label><input class="filter cuisineFilter" value="Southern" type="checkbox"/>Southern</label></li>
+                        <li><label><input class="filter cuisineFilter" value="Thai" type="checkbox"/>Thai</label></li>
+                        <li><label><input class="filter cuisineFilter" value="Vietnamese" type="checkbox"/>Vietnamese</label></li>
+                    </ul>
+                </div>
+                <div class="filters mealTypes">
+                    <h3 class="dropdown">Meal Types <i class="fa-solid fa-caret-down"></i></h3>
+                    <ul class="dropdown-filters">
+                        <li><label><input class="filter mealTypeFilter" value="main course" type="checkbox"/>Main Course</label></li>
+                        <li><label><input class="filter mealTypeFilter" value="side dish" type="checkbox"/>Side Dish</label></li>
+                        <li><label><input class="filter mealTypeFilter" value="dessert" type="checkbox"/>Dessert</label></li>
+                        <li><label><input class="filter mealTypeFilter" value="appetizer" type="checkbox"/>Appetizer</label></li>
+                        <li><label><input class="filter mealTypeFilter" value="salad" type="checkbox"/>Salad</label></li>
+                        <li><label><input class="filter mealTypeFilter" value="bread" type="checkbox"/>Bread</label></li>
+                        <li><label><input class="filter mealTypeFilter" value="breakfast" type="checkbox"/>Breakfast</label></li>
+                        <li><label><input class="filter mealTypeFilter" value="soup" type="checkbox"/>Soup</label></li>
+                        <li><label><input class="filter mealTypeFilter" value="beverage" type="checkbox"/>Beverage</label></li>
+                        <li><label><input class="filter mealTypeFilter" value="sauce" type="checkbox"/>Sauce</label></li>
+                        <li><label><input class="filter mealTypeFilter" value="marinade" type="checkbox"/>Marinade</label></li>
+                        <li><label><input class="filter mealTypeFilter" value="fingerfood" type="checkbox"/>Fingerfood</label></li>
+                        <li><label><input class="filter mealTypeFilter" value="snack" type="checkbox"/>Snack</label></li>
+                        <li><label><input class="filter mealTypeFilter" value="drink" type="checkbox"/>Drink</label></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="search-section">
+            <div class="search-searchBar-container">
+                <form id="searchBar">
+                    <input type="search" name="searchTerm" id="searchTerm" placeholder="Search here ..."/>
+                    <button type="submit"><i class="fas fa-search"></i></button>
+                </form>
+            </div>
+            <div class="search-results" id="searchResults">
+
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
+
+

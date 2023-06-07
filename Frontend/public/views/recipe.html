@@ -1,0 +1,55 @@
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recipeasy</title>
+    <link rel="stylesheet" href="/stylesheets/style.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <script src="https://kit.fontawesome.com/829e5d7ffb.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <script>var isAuthenticated = <%= isAuthenticated %>;</script>
+    <script>var userId = "<%= userId %>";</script>
+    <script type="module" src="/javascript/scripts/navScript.js" defer></script>
+    <script type="module" src="/recipePage.bundle.js" defer></script>
+</head>
+<body>
+<div class="loadingScreen" id="loadingScreen"><i class="fas fa-sync fa-spin"></i></div>
+<header>
+    <nav class="navbar-nav">
+        <div class="navbar-container">
+            <div class="navbar-logoContainer">
+                <a href="/"><strong>Recipeasy</strong></a>
+            </div>
+            <ul class="navbar-navLinksList">
+                <li class="navbar-navLink"><a href="/search">Search Recipes<span class="navLink-underline"></span></a></li>
+                <li class="navbar-navLink"><a >Today's Recommendations<span class="navLink-underline"></span></a></li>
+                <li>
+                    <div class="account-links-container">
+                        <ul class="account-links">
+                            <li style="float:left;">
+                                <div class="account-dropdown">
+                                    <div class="dropbutton-container">
+                                        <button class="account-dropbutton toggle-dropdwn-button" aria-expanded="false">
+                                            <i class="fa-solid fa-circle-user account-icon"></i>
+                                        </button>
+                                    </div>
+                                    <ul class="dropdown-content account-dropdown-content">
+                                        <li><a class="dropdown-links" href="/profile">Profile</a></li>
+                                        <li id="login-logout"></li>
+                                    </ul>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </nav>
+</header>
+<div class="recipe-container">
+</div>
+
+</body>
+</html>

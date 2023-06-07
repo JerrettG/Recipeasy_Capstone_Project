@@ -1,0 +1,101 @@
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recipeasy</title>
+  <link rel="stylesheet" href="/stylesheets/style.css">
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+  <script src="https://kit.fontawesome.com/829e5d7ffb.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+  <script>var isAuthenticated = <%= isAuthenticated %>;</script>
+  <script type="module" src="/javascript/scripts/navScript.js" defer></script>
+  <script type="module" src="/indexPage.bundle.js" defer></script>
+</head>
+<body>
+  <header>
+    <nav class="navbar-nav">
+      <div class="navbar-container">
+        <div class="navbar-logoContainer">
+          <a href="/"><strong>Recipeasy</strong></a>
+        </div>
+        <ul class="navbar-navLinksList">
+          <li class="navbar-navLink"><a href="/search">Search Recipes<span class="navLink-underline"></span></a></li>
+          <li class="navbar-navLink"><a >Today's Recommendations<span class="navLink-underline"></span></a></li>
+          <li>
+            <div class="account-links-container">
+              <ul class="account-links">
+                <li style="float:left;">
+                  <div class="account-dropdown">
+                    <div class="dropbutton-container">
+                      <button class="account-dropbutton toggle-dropdwn-button" aria-expanded="false">
+                        <i class="fa-solid fa-circle-user account-icon"></i>
+                      </button>
+                    </div>
+                    <ul class="dropdown-content account-dropdown-content">
+                      <li><a class="dropdown-links" href="/profile">Profile</a></li>
+                      <li id="login-logout"></li>
+                    </ul>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </nav>
+  </header>
+  <div class="loadingScreen" id="loadingScreen"><i class="fas fa-sync fa-spin"></i></div>
+  <div class="heroImage-section">
+    <div class="heroImage-container">
+      <div class="headline-container">
+        <span class="headline">
+          Transform Your Leftovers into Gourmet Meals
+        </span>
+        <p class="headline">
+          Discover Personalized Recipes with the ingredients in your fridge
+          or find meals that inspire your culinary creativity!
+        </p>
+      </div>
+      <div class="button-container">
+        <a href="/search" class="button button-link">Search Recipes</a>
+        <a href="/profile" class="button button-link">Create Profile</a>
+      </div>
+    </div>
+  </div>
+  <div class="userExperiences-section">
+    <div class="userExperience-container">
+      <div class="userExperience-image-container">
+        <img src="/images/stefan-vladimirov-Q_Moi2xjieU-unsplash.jpg" width="368" height="246">
+      </div>
+      <div class="userExperience-quote-container">
+          <span class="quote">
+            "I absolutely love this web app! It's so easy to use and helps me create delicious, healthy meals with the
+            proxyIngredients I already have on hand. It's perfect for busy weeknights when I don't have time to run to the
+            grocery store, and the recipes are always a hit with my family. I highly recommend it to anyone looking for
+            inspiration in the kitchen!"
+          </span>
+          <p style="text-align: end; width: 100%;">
+            Written By: Naomi C.
+          </p>
+      </div>
+    </div>
+    <div class="userExperience-container" style="flex-direction: row-reverse">
+      <div class="userExperience-image-container">
+        <img src="../images/or-hakim-S2Eql9vHN3o-unsplash.jpg" width="400" height="250">
+      </div>
+      <div class="userExperience-quote-container">
+          <span class="quote">
+            "Finally, an app that turns my fridge full of ingredients into a creative and delicious meal plan.
+            It's like having a personal chef who knows exactly what's in my kitchen!"
+          </span>
+          <p style="text-align: end; width: 100%;">
+            Written By: Andre P.
+          </p>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

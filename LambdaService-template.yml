@@ -1,0 +1,315 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: 'AWS::Serverless-2016-10-31'
+Description: An AWS Lambda application that calls the Lambda API.
+Parameters:
+  EnvironmentName:
+    Type: String
+    Default: dev
+Resources:
+  VPC:
+    Type: 'AWS::EC2::VPC'
+    Properties:
+      CidrBlock: 10.192.0.0/16
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      InstanceTenancy: default
+      Tags:
+        - Key: Name
+          Value: !Ref EnvironmentName
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+  AttachGateway:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref VPC
+      InternetGatewayId: !Ref InternetGateway
+  PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: Public
+  PublicRoute1:
+    Type: AWS::EC2::Route
+    DependsOn: AttachGateway
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+  SecurityGroup:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: Security Group for Example Replication Group
+      SecurityGroupEgress:
+        - CidrIp: 0.0.0.0/0
+          IpProtocol: "-1"
+      SecurityGroupIngress:
+        - CidrIp: 0.0.0.0/0
+          FromPort: 6379
+          ToPort: 6379
+          IpProtocol: tcp
+      VpcId: !Ref VPC
+  SubnetGroup:
+    Type: 'AWS::ElastiCache::SubnetGroup'
+    Properties:
+      Description: Subnet Group for Example Replication Group
+      SubnetIds:
+        - !Ref PublicSubnet
+  PublicSubnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: !Select [ 0, !GetAZs '' ]
+      CidrBlock: 10.192.11.0/24
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName} Public Subnet (AZ1)
+  PublicSubnetARouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnet
+      RouteTableId: !Ref PublicRouteTable
+  CacheParameterGroup:
+    Type: 'AWS::ElastiCache::ParameterGroup'
+    Properties:
+      CacheParameterGroupFamily: redis5.0
+      Description: !Ref 'AWS::StackName'
+  ReplicationGroup:
+    Type: 'AWS::ElastiCache::ReplicationGroup'
+    Properties:
+      ReplicationGroupDescription: redis cache cluster
+      AutomaticFailoverEnabled: false
+      CacheNodeType: cache.t4g.micro
+      CacheParameterGroupName: !Ref CacheParameterGroup
+      CacheSubnetGroupName: !Ref SubnetGroup
+      Engine: redis
+      EngineVersion: 5.0.6
+      PreferredMaintenanceWindow: 'sat:07:00-sat:08:00'
+      NumCacheClusters: 1
+      SecurityGroupIds: [ { "Fn::GetAtt": ["SecurityGroup",  "GroupId"] } ]
+  DynamoDBEndpoint:
+    Type: "AWS::EC2::VPCEndpoint"
+    Properties:
+      ServiceName: !Sub "com.amazonaws.${AWS::Region}.dynamodb"
+      VpcId: !Ref VPC
+      RouteTableIds: [ { "Fn::GetAtt": [ "PublicRouteTable",  "RouteTableId" ] } ]
+      PolicyDocument: {
+        "Id": "Policy",
+        "Version": "2012-10-17",
+        "Statement": [
+          {
+            "Sid": "Statement",
+            "Action": "dynamodb:*",
+            "Effect": "Allow",
+            "Resource": "*",
+            "Principal": "*"
+          }
+        ]
+      }
+  GetProfileFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ProfileServiceLambda/build/distributions/ProfileServiceLambda.zip
+      Handler: com.kenzie.capstone.service.lambda.GetProfile
+      Runtime: java11
+      Description: Get profile for given userId
+      MemorySize: 512
+      Timeout: 240
+      # Function's execution role
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - AWSLambda_ReadOnlyAccess
+        - AWSXrayWriteOnlyAccess
+        - AWSLambdaVPCAccessExecutionRole
+        - AmazonS3FullAccess
+        - AmazonDynamoDBFullAccess
+      Tracing: Active
+      VpcConfig:
+        SecurityGroupIds: [ { "Fn::GetAtt": ["SecurityGroup",  "GroupId"] } ]
+        SubnetIds:
+          - !Ref PublicSubnet
+      Environment:
+        Variables:
+          JEDIS_URL: !GetAtt ReplicationGroup.PrimaryEndPoint.Address
+      Events:
+        UpdateResource:
+          Type: Api
+          Properties:
+            Path: /api/v1/profileService/profile/{userId}
+            Method: get
+  CreateProfileFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ProfileServiceLambda/build/distributions/ProfileServiceLambda.zip
+      Handler: com.kenzie.capstone.service.lambda.CreateProfile
+      Runtime: java11
+      Description: Create a profile with given information
+      MemorySize: 512
+      Timeout: 240
+      # Function's execution role
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - AWSLambda_ReadOnlyAccess
+        - AWSXrayWriteOnlyAccess
+        - AWSLambdaVPCAccessExecutionRole
+        - AmazonS3FullAccess
+        - AmazonDynamoDBFullAccess
+      Tracing: Active
+      VpcConfig:
+        SecurityGroupIds: [ { "Fn::GetAtt": ["SecurityGroup",  "GroupId"] } ]
+        SubnetIds:
+          - !Ref PublicSubnet
+      Environment:
+        Variables:
+          JEDIS_URL: !GetAtt ReplicationGroup.PrimaryEndPoint.Address
+      Events:
+        UpdateResource:
+          Type: Api
+          Properties:
+            Path: /api/v1/profileService/profile/
+            Method: post
+  UpdateProfileFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ProfileServiceLambda/build/distributions/ProfileServiceLambda.zip
+      Handler: com.kenzie.capstone.service.lambda.UpdateProfile
+      Runtime: java11
+      Description: Update a profile for a userId
+      MemorySize: 512
+      Timeout: 240
+      # Function's execution role
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - AWSLambda_ReadOnlyAccess
+        - AWSXrayWriteOnlyAccess
+        - AWSLambdaVPCAccessExecutionRole
+        - AmazonS3FullAccess
+        - AmazonDynamoDBFullAccess
+      Tracing: Active
+      VpcConfig:
+        SecurityGroupIds: [ { "Fn::GetAtt": ["SecurityGroup",  "GroupId"] } ]
+        SubnetIds:
+          - !Ref PublicSubnet
+      Environment:
+        Variables:
+          JEDIS_URL: !GetAtt ReplicationGroup.PrimaryEndPoint.Address
+      Events:
+        UpdateResource:
+          Type: Api
+          Properties:
+            Path: /api/v1/profileService/profile/
+            Method: put
+  DeleteProfileFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ProfileServiceLambda/build/distributions/ProfileServiceLambda.zip
+      Handler: com.kenzie.capstone.service.lambda.DeleteProfile
+      Runtime: java11
+      Description: Delete a profile for a userId
+      MemorySize: 512
+      Timeout: 240
+      # Function's execution role
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - AWSLambda_ReadOnlyAccess
+        - AWSXrayWriteOnlyAccess
+        - AWSLambdaVPCAccessExecutionRole
+        - AmazonS3FullAccess
+        - AmazonDynamoDBFullAccess
+      Tracing: Active
+      VpcConfig:
+        SecurityGroupIds: [ { "Fn::GetAtt": ["SecurityGroup",  "GroupId"] } ]
+        SubnetIds:
+          - !Ref PublicSubnet
+      Environment:
+        Variables:
+          JEDIS_URL: !GetAtt ReplicationGroup.PrimaryEndPoint.Address
+      Events:
+        UpdateResource:
+          Type: Api
+          Properties:
+            Path: /api/v1/profileService/profile/{userId}
+            Method: delete
+  GetRecipesByComplexSearchFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: RecipeAPIProxyLambda/build/distributions/RecipeAPIProxyLambda.zip
+      Handler: com.kenzie.capstone.recipe.api.proxy.lambda.GetRecipesByComplexSearch
+      Runtime: java11
+      Description: Makes a request to external API complex search endpoint
+      MemorySize: 512
+      Timeout: 240
+      # Function's execution role
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - AWSLambda_ReadOnlyAccess
+        - AWSXrayWriteOnlyAccess
+        - AWSLambdaVPCAccessExecutionRole
+        - AmazonS3FullAccess
+        - AmazonDynamoDBFullAccess
+      Tracing: Active
+      Environment:
+        Variables:
+          SPOONACULAR_API_KEY: "${SPOONACULAR_API_KEY}"
+      Events:
+        UpdateResource:
+          Type: Api
+          Properties:
+            Path: /proxy/v1/recipes/complexSearch
+            Method: get
+  GetRecipeByIdFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: RecipeAPIProxyLambda/build/distributions/RecipeAPIProxyLambda.zip
+      Handler: com.kenzie.capstone.recipe.api.proxy.lambda.GetRecipeById
+      Runtime: java11
+      Description: Makes a request to external API get recipe by id endpoint
+      MemorySize: 512
+      Timeout: 240
+      # Function's execution role
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - AWSLambda_ReadOnlyAccess
+        - AWSXrayWriteOnlyAccess
+        - AWSLambdaVPCAccessExecutionRole
+        - AmazonS3FullAccess
+        - AmazonDynamoDBFullAccess
+      Tracing: Active
+      Environment:
+        Variables:
+          SPOONACULAR_API_KEY: "${SPOONACULAR_API_KEY}"
+      Events:
+        UpdateResource:
+          Type: Api
+          Properties:
+            Path: /proxy/v1/recipes/{id}
+            Method: get
+  GetIngredientsBySearchFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: RecipeAPIProxyLambda/build/distributions/RecipeAPIProxyLambda.zip
+      Handler: com.kenzie.capstone.recipe.api.proxy.lambda.GetIngredientsBySearch
+      Runtime: java11
+      Description: Makes a request to external API search ingredients endpoint
+      MemorySize: 512
+      Timeout: 240
+      # Function's execution role
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - AWSLambda_ReadOnlyAccess
+        - AWSXrayWriteOnlyAccess
+        - AWSLambdaVPCAccessExecutionRole
+        - AmazonS3FullAccess
+        - AmazonDynamoDBFullAccess
+      Tracing: Active
+      Environment:
+        Variables:
+          SPOONACULAR_API_KEY: "${SPOONACULAR_API_KEY}"
+      Events:
+        UpdateResource:
+          Type: Api
+          Properties:
+            Path: /proxy/v1/ingredients/search
+            Method: get

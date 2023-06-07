@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/html" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recipeasy</title>
+    <link rel="stylesheet" href="/stylesheets/style.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <script src="https://kit.fontawesome.com/829e5d7ffb.js" crossorigin="anonymous"></script>
+    <script>var isAuthenticated = <%= isAuthenticated %>;</script>
+    <script>var userId = "<%= userId %>";</script>
+    <script type="module" src="/javascript/scripts/navScript.js" defer></script>
+    <script type="module" src="/javascript/scripts/sliderScript.js" defer></script>
+    <script type="module" src="/profilePage.bundle.js" defer></script>
+</head>
+<body>
+    <div class="popup-screen"></div>
+    <div class="loadingScreen" id="loadingScreen"><i class="fas fa-sync fa-spin"></i></div>
+    <header>
+        <nav class="navbar-nav">
+            <div class="navbar-container">
+                <div class="navbar-logoContainer">
+                    <a href="/"><strong>Recipeasy</strong></a>
+                </div>
+                <ul class="navbar-navLinksList">
+                    <li class="navbar-navLink"><a href="/search">Search Recipes<span class="navLink-underline"></span></a></li>
+                    <li class="navbar-navLink"><a>Today's Recommendations<span class="navLink-underline"></span></a></li>
+                    <li class="navbar-navLink">
+                        <div class="account-links-container">
+                            <ul class="account-links">
+                                <li style="float:left;">
+                                    <div class="account-dropdown">
+                                        <div class="dropbutton-container">
+                                            <button class="account-dropbutton toggle-dropdwn-button" aria-expanded="false">
+                                                <i class="fa-solid fa-circle-user account-icon"></i>
+                                            </button>
+                                        </div>
+                                        <ul class="dropdown-content account-dropdown-content">
+                                            <li><a class="dropdown-links" href="/profile">Profile</a></li>
+                                            <li id="login-logout"></li>
+                                        </ul>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+    <div class="profileInfo-section">
+        <div class="profileInfo-container">
+            <form id="editProfile-form">
+                <div class="editButtons">
+                    <button type="button" id="editProfile-button" class="edit-button">Edit</button>
+                    <button type="submit" form="editProfile-form" id="saveEditProfile-button" class="save_cancel-buttons">Save</button>
+                    <button type="button" id="cancelEditProfile-button" class="save_cancel-buttons">Cancel</button>
+                    <!--                <button type="button" id="deleteProfile-button">Delete</button>-->
+                </div>
+                <fieldset disabled class="form">
+                    <div class="profileInfo form-group">
+                        <span>Username:</span>
+                        <span class="form-group-input" id="profile-username"></span>
+                    </div>
+                    <div class="profileInfo form-group">
+                        <span>Email:</span>
+                        <input name="email" value="" type="email" id="profile-email">
+                    </div>
+                    <div class="profileInfo form-group">
+                        <span>Full Name:</span>
+                        <input name="name" value="" type="text" id="profile-fullName">
+                    </div>
+                    <div class="profileInfo">
+                        <span>Dietary Restrictions:</span>
+                        <div class="dietaryRestricts">
+                            <label><input class="filter dietaryRestrictionFilter" name="dietaryRestriction" value="Gluten Free" type="checkbox"/>Gluten Free</label>
+                            <label><input class="filter dietaryRestrictionFilter" name="dietaryRestriction" value="Ketogenic" type="checkbox"/>Ketogenic</label>
+                            <label><input class="filter dietaryRestrictionFilter" name="dietaryRestriction" value="Vegetarian" type="checkbox"/>Vegetarian</label>
+                            <label><input class="filter dietaryRestrictionFilter" name="dietaryRestriction" value="Lacto-Vegetarian" type="checkbox"/>Lacto-Vegetarian</label>
+                            <label><input class="filter dietaryRestrictionFilter" name="dietaryRestriction" value="Ovo-Vegetarian" type="checkbox"/>Ovo-Vegetarian</label>
+                            <label><input class="filter dietaryRestrictionFilter" name="dietaryRestriction" value="Vegan" type="checkbox"/>Vegan</label>
+                            <label><input class="filter dietaryRestrictionFilter" name="dietaryRestriction" value="Pescetarian" type="checkbox"/>Pescetarian</label>
+                            <label><input class="filter dietaryRestrictionFilter" name="dietaryRestriction" value="Paleo" type="checkbox"/>Paleo</label>
+                            <label><input class="filter dietaryRestrictionFilter" name="dietaryRestriction" value="Primal" type="checkbox"/>Primal</label>
+                            <label><input class="filter dietaryRestrictionFilter" name="dietaryRestriction" value="Low FODMAP" type="checkbox"/>Low FODMAP</label>
+                            <label><input class="filter dietaryRestrictionFilter" name="dietaryRestriction" value="Whole30" type="checkbox"/>Whole30</label>
+                        </div>
+                    </div>
+                </fieldset>
+            </form>
+        </div>
+    </div>
+    <div class="userRecommendations-section">
+        <h3>Your Recommendations</h3>
+        <div class="userRecommendations-container">
+            <div class="userRecommendations-label">Maximize ingredients in your fridge</div>
+            <div class="userRecommendations" id="recommendations-maxIngredients">
+                <span class="userRecommendations-arrow"><i class="fa-solid fa-circle-arrow-left slider-arrow-left"></i></span>
+                <div class="userRecommendations-slider">
+
+                </div>
+                <span class="userRecommendations-arrow"><i class="fa-solid fa-circle-arrow-right slider-arrow-right"></i></span>
+            </div>
+        </div>
+        <div class="userRecommendations-container">
+            <div class="userRecommendations-label">Minimize missing ingredients</div>
+            <div class="userRecommendations" id="recommendations-minMissing">
+                <span class="userRecommendations-arrow"><i class="fa-solid fa-circle-arrow-left slider-arrow-left"></i></span>
+                <div class="userRecommendations-slider">
+
+                </div>
+                <span class="userRecommendations-arrow"><i class="fa-solid fa-circle-arrow-right slider-arrow-right"></i></span>
+            </div>
+        </div>
+    </div>
+    <div class="savedRecipes-section">
+        <h3>Saved recipes</h3>
+        <div class="savedRecipes">
+            <ul class="savedRecipes-ul">
+            </ul>
+        </div>
+    </div>
+    <div class="userFridge-section">
+        <div class="userFridge-header">
+            <h3>What's in your fridge</h3>
+            <button data-popup=".addFridgeItem-container" class="addFridgeItem-button button">+ Add Fridge Item</button>
+        </div>
+        <div class="userFridge">
+            <ul class="fridgeItems-ul">
+            </ul>
+        </div>
+    </div>
+    <div class="popups-container"></div>
+</body>
+</html>
+
+

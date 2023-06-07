@@ -1,0 +1,11 @@
+Resources:
+  Function:
+    Type: AWS::Serverless::Function
+    Properties:
+      Timeout: 300
+      MemorySize: 960
+      Handler: com.kenzie.capstone.service.lambda.UpdateProfile
+      CodeUri: C:\Users\davhu\Desktop\kenzie\ata-capstone-project-Team-Subpar\ProfileServiceLambda
+      Runtime: java11
+      Architectures:
+        - x86_64
